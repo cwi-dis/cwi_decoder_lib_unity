@@ -26,7 +26,7 @@
 //CWI_ENCODE_API int fncwi_encode(void);
 //CWI_ENCODE_API int cwi_encoder(encoder_params param, void* pc, std::stringstream& comp_frame);
 
-extern "C" __declspec(dllexport) int cwi_encoder(encoder_params param, void* pc, std::stringstream& comp_frame);
-extern "C" __declspec(dllexport) int cwi_decoder(encoder_params param, void* pc, std::stringstream& comp_frame);
+extern "C" __declspec(dllexport) int cwi_encoder(encoder_params param, void* pc, std::stringstream& comp_frame, std::uint64_t timeStamp);
+extern "C" __declspec(dllexport) int cwi_decoder(encoder_params param, void* pc, std::stringstream& comp_frame, std::uint64_t &timeStamp);
 
 

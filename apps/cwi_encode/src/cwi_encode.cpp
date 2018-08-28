@@ -1,5 +1,6 @@
 // cwi_encode.cpp : Defines the exported functions for the DLL application.
 //
+#include <cstdint>
 #include <sstream>
 #include <evaluate_comp.h>
 #include <evaluate_comp_impl.hpp>
@@ -74,26 +75,6 @@ encoder_V2_->setMacroblockSize(macroblock_size_);
 //pcl::PointCloud<PointT> pointcloud
 //New pointer 
 //CWI_ENCODE_API int cwi_encoder(encoder_params param, void* pc, std::stringstream& comp_frame)
-extern "C" __declspec(dllexport) int Cwi_encoder(encoder_params param, void* pc, std::stringstream& comp_frame)
-{
-	//int argc = 0;
-	//char *argv[] = { NULL };
-	evaluate_comp_impl<PointXYZRGB> evaluate;
-	//std::cout << "Starting evaluator \n";
-	return evaluate.evaluator(param, pc, comp_frame) == true ? 0 : -1;
-}
-
-extern "C" __declspec(dllexport) int Cwi_decoder(encoder_params param, void* pc, std::stringstream& comp_frame)
-{
-	int argc = 0;
-	char *argv[] = { NULL };
-	evaluate_comp_impl<PointXYZRGB> evaluate;
-	return evaluate.evaluate_dc(param, pc, comp_frame) == true ? 0 : -1;
-}
-extern "C" __declspec(dllexport) int Cwi_test(int a, int b)
-{
-	return a * b;
-}
 
 
 	/*std::ofstream log1;
@@ -143,6 +124,7 @@ struct MyPointCloud
 {
 	MyPoint pointcloud[921600];
 	int size;
+	uint64_t timeStamp;
 };
 extern "C" __declspec(dllexport) MyPointCloud Cwi_test2(char* filename, void* p)
 {
@@ -202,5 +184,44 @@ extern "C" __declspec(dllexport) MyPointCloud Cwi_test2(char* filename, void* p)
 	ptcld.pointcloud[1].b = 102;
 	ptcld.pointcloud[1].g = 102;
 	*/
+	return ptcld;
+}
+extern "C" __declspec(dllexport) MyPointCloud Cwi_decoder(unsigned char * compFrame)
+{
+	encoder_params par;
+	//Default values in signals
+	par.num_threads = 4;
+	par.do_inter_frame = false;
+	par.gop_size = 1;
+	par.exp_factor = 0;
+	par.octree_bits = 11;
+	par.color_bits = 8;
+	par.jpeg_quality = 85;
+	par.macroblock_size = 16;
+	std::stringstream compfr;
+	//Convert C# bytestream to stringstream for decoding
+	compfr << (char *) compFrame;
+	evaluate_comp_impl<PointXYZRGB> evaluate;
+	boost::shared_ptr<pcl::PointCloud<PointXYZRGB> > decpc(new PointCloud<PointXYZRGB>());
+	decpc->makeShared();
+	void * dpc;
+	dpc = reinterpret_cast<void *> (&decpc);
+	uint64_t tmStmp=0;
+	evaluate.evaluate_dc(par, dpc, compfr, tmStmp);
+	//Format coversion
+	MyPointCloud ptcld;
+	pcl::PointCloud<PointXYZRGB> cld = *decpc;
+	int size = cld.height * cld.width;
+	ptcld.size = size;
+	ptcld.timeStamp = tmStmp;
+	for (int i = 0; i < size; i++)
+	{
+		ptcld.pointcloud[i].x = cld.points[i].x;
+		ptcld.pointcloud[i].y = cld.points[i].y;
+		ptcld.pointcloud[i].z = cld.points[i].z;
+		ptcld.pointcloud[i].r = cld.points[i].r;
+		ptcld.pointcloud[i].g = cld.points[i].g;
+		ptcld.pointcloud[i].b = cld.points[i].b;
+	}
 	return ptcld;
 }

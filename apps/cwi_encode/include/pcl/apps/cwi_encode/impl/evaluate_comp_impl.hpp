@@ -662,7 +662,11 @@ template<typename PointT>
 int
 load_ply_file (std::string path, boost::shared_ptr<pcl::PointCloud<PointT> > pc)
 {
-  int rv = 1;
+	std::ofstream log5;
+	log5.open("log.txt", std::ofstream::app);
+	log5 << "\nLooking for :"<<path;
+	log5.close();
+	int rv = 1;
   PLYReader ply_reader;
 /* next straighforward code crashes, work around via PolygonMesh *
    PCLPointCloud2 pc2;
@@ -678,6 +682,10 @@ load_ply_file (std::string path, boost::shared_ptr<pcl::PointCloud<PointT> > pc)
   } else {
     rv= 0;
   }
+  std::ofstream log6;
+  log6.open("log.txt", std::ofstream::app);
+  log6 << "\nRead complete return value is: " << rv;
+  log6.close();
   return rv;
 }
 
@@ -979,12 +987,6 @@ evaluate_comp_impl<PointT>::evaluate_dc(encoder_params param, void* pc, std::str
 		//{
 		//return false;
 		//}
-		debug_level_ = vm_["debug_level"].template as<int>();
-		if (debug_level_ > 0)
-		{
-			std::cout << "debug_level=" << debug_level_ << "\n";
-			print_options(vm_);
-		}
 		#ifdef WITH_VTK
 		std::cout << "WITH_VTK='" << WITH_VTK << "'\n";
 		#endif/*WITH_VTK*/
@@ -997,6 +999,10 @@ evaluate_comp_impl<PointT>::evaluate_dc(encoder_params param, void* pc, std::str
 		assign_option_values(param);
 		//Stays unchanged
 		complete_initialization();
+		std::ofstream log3;
+		log3.open("log.txt", std::ofstream::app);
+		log3 << "\n Options assigned, codec initialised";
+		log3.close();
 		//if (input_directories_.size() > 1)
 		//{
 		//cout << "Fusing multiple directories not implemented.\n";
@@ -1035,7 +1041,13 @@ evaluate_comp_impl<PointT>::evaluate_dc(encoder_params param, void* pc, std::str
 		boost::shared_ptr<pcl::PointCloud<PointT> > pc(new pcl::PointCloud<PointT>());
 		//stringstream ss;
 		//stringstream *codedstream = &ss;
-		do_decoding(&comp_frame, pointcloud, achieved_quality);
+		std::ofstream log4;
+		log4.open("log.txt", std::ofstream::app);
+		log4 << "\n Started Decoding";
+		log4.close();
+		string s = comp_frame.str();
+		std::stringstream coded_stream(s);
+		do_decoding(&coded_stream, pointcloud, achieved_quality);
 
 		//do_encoding(pointcloud, &ss, achieved_quality);
 		//string s = ss.str();
@@ -1076,6 +1088,10 @@ evaluate_comp_impl<PointT>::evaluate_dc(encoder_params param, void* pc, std::str
 		}
 		}
 		*/
+		std::ofstream log5;
+		log5.open("log.txt", std::ofstream::app);
+		log5 << "\n Started Decoding";
+		log5.close();
 	}
 	catch (boost::exception &e) {
 		std::cerr << boost::diagnostic_information(e) << "\n";
@@ -1092,7 +1108,6 @@ evaluate_comp_impl<PointT>::evaluate_dc(encoder_params param, void* pc, std::str
 	*/
 	return return_value;
 }
-
 template<typename PointT>
 bool
 evaluate_comp_impl<PointT>::evaluate_group(std::vector<boost::shared_ptr<pcl::PointCloud<PointT> > >& group,
@@ -1188,4 +1203,6 @@ evaluate_comp_impl<PointT>::evaluate_group(std::vector<boost::shared_ptr<pcl::Po
   }
   return rv;
 }
+
+
 #endif /* evaluate_compression_hpp */

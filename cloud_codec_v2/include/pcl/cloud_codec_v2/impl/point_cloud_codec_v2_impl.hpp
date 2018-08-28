@@ -228,7 +228,7 @@ namespace pcl{
     {
 
       // synchronize to frame header
-      syncToHeader(compressed_tree_data_in_arg);
+      //syncToHeader(compressed_tree_data_in_arg);
 
       // initialize octree
       switchBuffers ();

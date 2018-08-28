@@ -3,7 +3,9 @@
 #include <sstream>
 #include <evaluate_comp.h>
 #include <evaluate_comp_impl.hpp>
-#include "cwi_encode.h"
+#include <fstream>
+#include <stdio.h>
+//#include "cwi_encode.h"
 
 using namespace std;
 // point cloud library
@@ -72,7 +74,7 @@ encoder_V2_->setMacroblockSize(macroblock_size_);
 //pcl::PointCloud<PointT> pointcloud
 //New pointer 
 //CWI_ENCODE_API int cwi_encoder(encoder_params param, void* pc, std::stringstream& comp_frame)
-int cwi_encode::cwi_encoder(encoder_params param, void* pc, std::stringstream& comp_frame)
+extern "C" __declspec(dllexport) int Cwi_encoder(encoder_params param, void* pc, std::stringstream& comp_frame)
 {
 	//int argc = 0;
 	//char *argv[] = { NULL };
@@ -81,10 +83,124 @@ int cwi_encode::cwi_encoder(encoder_params param, void* pc, std::stringstream& c
 	return evaluate.evaluator(param, pc, comp_frame) == true ? 0 : -1;
 }
 
-int cwi_encode::cwi_decoder(encoder_params param, void* pc, std::stringstream& comp_frame)
+extern "C" __declspec(dllexport) int Cwi_decoder(encoder_params param, void* pc, std::stringstream& comp_frame)
 {
 	int argc = 0;
 	char *argv[] = { NULL };
 	evaluate_comp_impl<PointXYZRGB> evaluate;
 	return evaluate.evaluate_dc(param, pc, comp_frame) == true ? 0 : -1;
+}
+extern "C" __declspec(dllexport) int Cwi_test(int a, int b)
+{
+	return a * b;
+}
+
+
+	/*std::ofstream log1;
+	log1.open("log.txt", std::ofstream::app);
+	log1 << "Entering cwi_test2";
+	log1.close();
+	encoder_params par;
+	par.num_threads = 4;
+	par.do_inter_frame = false;
+	par.gop_size = 1;
+	par.exp_factor = 0;
+	par.octree_bits = 9;
+	par.color_bits = 8;
+	par.jpeg_quality = 85;
+	par.macroblock_size = 16;
+	std::ofstream log;
+	log.open("log.txt");
+	log << "\nCompression parameters assigned", std::ofstream::app;
+	log.close();
+	evaluate_comp_impl<PointXYZRGB> evaluate;
+	void * pc;
+	std::ofstream log99;
+	log99.open("log.txt", std::ofstream::app);
+	log99 << "\n The first stringstream will be created now";
+	log99.close();
+	stringstream comp_frame(comp_fr);
+	std::ofstream log2;
+	log2.open("log.txt", std::ofstream::app);
+	log2 << "\n Input converted to stringstream, decoding initialized";
+	log2.close();
+	return evaluate.evaluate_dc(par, pc, comp_frame) == true ? 0 : -1;
+	*/
+struct PLYExport
+{
+	boost::shared_ptr<pcl::PointCloud<PointXYZRGB>> pc;
+};
+struct MyPoint
+{
+	float x;
+	float y;
+	float z;
+	INT8 r;
+	INT8 g;
+	INT8 b;
+};
+struct MyPointCloud
+{
+	MyPoint pointcloud[921600];
+	int size;
+};
+extern "C" __declspec(dllexport) MyPointCloud Cwi_test2(char* filename, void* p)
+{
+	std::string path(filename);
+	std::ofstream log1;
+	log1.open("log.txt");
+	log1 << "\n Entered the function";
+	log1.close();
+	auto pe = new PLYExport;
+	pe->pc = boost::shared_ptr<pcl::PointCloud<PointXYZRGB>>(new PointCloud<PointXYZRGB>());
+	std::ofstream log2;
+	log2.open("log.txt", std::ofstream::app);
+	log2 << "\n Created empty point cloud object :" << path;
+	log2.close();
+	int res = load_ply_file<PointXYZRGB>(path, pe->pc);
+	std::ofstream log3;
+	log3.open("log.txt", std::ofstream::app);
+	log3 << "\n Load PLY complete size is :" << sizeof(pe->pc);
+	log3.close();
+	p = reinterpret_cast<void*>(pe);
+	std::ofstream log4;
+	log4.open("log.txt", std::ofstream::app);
+	log4 << "\n Point cloud cast to void pointer";
+	log4.close();
+	/*
+	MyPoint test;
+	test.x = 99;
+	test.y = 99;
+	test.z = 99;
+	test.r = 50;
+	test.g = 50;
+	test.b = 50;
+	p = reinterpret_cast<void *>(&test);
+	MyPoint *test2;
+	test2 = reinterpret_cast<MyPoint *>(p);
+	*/
+	MyPointCloud ptcld;
+	pcl::PointCloud<PointXYZRGB> cld = *(pe->pc);
+	int size = cld.height * cld.width;
+	ptcld.size = size;
+	//ptcld.pointcloud = new MyPoint[size];
+	for (int i = 0; i < size; i++)
+	{
+		ptcld.pointcloud[i].x = cld.points[i].x;
+		ptcld.pointcloud[i].y = cld.points[i].y;
+		ptcld.pointcloud[i].z = cld.points[i].z;
+		ptcld.pointcloud[i].r = cld.points[i].r;
+		ptcld.pointcloud[i].g = cld.points[i].g;
+		ptcld.pointcloud[i].b = cld.points[i].b;
+	}
+	/*ptcld.pointcloud = new MyPoint[2];
+	ptcld.pointcloud[0] = test;
+	ptcld.pointcloud[1].x = 102;
+	ptcld.pointcloud[1].y = 102;
+	ptcld.pointcloud[1].z = 102;
+	ptcld.pointcloud[1].r = 102;
+	ptcld.pointcloud[1].b = 102;
+	ptcld.pointcloud[1].g = 102;
+	*/
+	return ptcld;
 }

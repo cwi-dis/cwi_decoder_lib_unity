@@ -144,6 +144,8 @@ struct MyPoint
 	INT8 g;
 	INT8 b;
 };
+
+
 struct MyPointCloud
 {
 	MyPoint pointcloud[921600];

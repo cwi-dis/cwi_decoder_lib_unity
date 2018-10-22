@@ -19,6 +19,7 @@ This package contains:
 * evaluation library
 * tools for testing and evaluation of several aspects of this codec
 * installation instruction
+* a codec DLL
 
 To use it, several dependencies (Boost,Eigen,Flann,QHull,VTK and libjpeg-turbo) need to be installed:  
 
@@ -31,85 +32,63 @@ To use it, several dependencies (Boost,Eigen,Flann,QHull,VTK and libjpeg-turbo) 
 Installation
 ============
 
-Easy Ubuntu 16.04 Install PCL 1.8.0 using binary packages:
-----------------------------------------------------------
+Installation
+PointCLoudLibrary PCL-1.8.1 and liblpeg-turbo:
+To build the package 'cwi-pcl-codec', first the Point Cloud Library (PCL) (http://pointclouds.org) its dependencies and libjpeg-turbo need to be installed:
 
-* On a clean Ubuntu 16.04 installation, start 'Terminal' and install the basic tools and 3rd party packages packages:  
-   sudo apt-get install -y git build-essential linux-libc-dev cmake cmake-gui cmake cmake-gui libusb-1.0-0-dev libusb-dev libudev-dev mpi-default-dev openmpi-bin openmpi-common libflann1.8 libflann-dev libeigen3-dev libboost-all-dev libvtk6.2-qt libvtk6.2 libvtk6-dev libvtk6-qt-dev libqhull* libgtest-dev freeglut3-dev pkg-config libxmu-dev libxi-dev mono-complete qt-sdk openjdk-8-jdk openjdk-8-jre libopenni0 libopenni-sensor-pointclouds0  libopenni-dev libopenni-sensor-pointclouds-dev libproj-dev libjpeg-turbo8-dev
-   
-* Get the PCL-1.8 (Point CLoud Librarry) installer for Ubuntu 16.04 64-bit:  
-wget https://www.dropbox.com/s/9llzm20pc4opdn9/PCL-1.8.0-Linux.deb   
-(see also: 'https://larrylisky.com/2014/03/03/installing-pcl-on-ubuntu/')   
-(prior versions of PCL are not recommended, e.g. in PCL1.7 visualization does not work properly)
+for Ubuntu 18.04 by installing 2 Debian packages ('gcc', 'cmake' and 'make' required):
+libpcl-dev and libturbojpeg0-dev using the package manger 'synaptic'
 
-* Install PCL-1.8:
-  sudo dpkg -i PCL-1.8.0-Linux.deb
+for Windows 8 and 10 with VisualStudio 2015/2017, use the all-in-one installer for PCL-1.8.1 for your system
+and Visual Studio version available at: http://unanancyowen.com/en/pcl181/. Make sure you also set the System Environment Variable 'PCL_ROOT' en 'PATH' as detailed at the download webrite !
+In addition, get and install 'libjpeg-turbo', from 'libjpeg-turbo.org'
 
-* This installer has a bug, for which a patch is to be used: 'cd' to the directory 'cwi-pcl-codec'
-  (where this file README.md was distributed), and type:
-  (PATCH=$PWD/PCLConfig-Ubuntu16.04.patch;cd /;sudo patch -p1 < $PATCH)
-  
-* Start 'cmake-gui', specify the directory where this file is located in 'Where is the source code',
-  another empty directory 'Where to build the binaries', and select 'Unix Makefiles' in the 'CMakeSetup'
-  pop-up window. Click(tap) 'Configure', and 'Generate'.
+For MacOS 10.13.8 High Sierra type in a terminal window: brew install jpeg-turbo pcl
 
-Now the codec libraries and evaluation tools can be build by typing 'make' in the directory
-that was specified in 'cmake-gui' to build the binaries.
+for all other supported systems by downloading, building and installing PCL and its necessary Third Party Package (TPP's: Boost,Eigen,Flann,QHull,VTK and libjpeg-turbo) as described at:
+http://pointclouds.org/downloads -> 'Compiling from source'.
 
-Less easy install on Windows 7,8,10:
-------------------------------------
+Ubuntu 18.04 Build & Install:
+Start 'cmake-gui (>= 3.10)', specify the directory where this file is located in 'Where is the source code', another empty directory 'Where to build the binaries', and select 'Unix Makefiles' in the 'CMakeSetup' pop-up window. Click(tap) 'Configure', and 'Generate'.
+Now the codec libraries and evaluation tools can be build by typing 'make' in the directory that was specified in 'cmake-gui' to build the binaries.
 
-* Install 'Visual Studio (2015)' and 'cmake-gui'
+Windows 8,10 Build & Install:
+Install 'Visual Studio (2015 or 2017)' and 'cmake-gui'
+Download source tarball for 'libjpeg-turbo' from 'www.libjpeg-turbo.org':
+https://sourceforge.net/projects/libjpeg-turbo/files/1.5.3/libjpeg-turbo-1.5.3.tar.gz/download
+Unpack the tarball and start 'cmake_gui', select for 'source code' directory the top-level directory
+of 'libturbo-jpeg' (contains 'CMakelists.txt'), and for 'binaries' another directory, click 'Configure' and 'Generate'.
+Now in your 'binaries' directory open the file 'libjpeg-turbo-1.5.3.sln' with Visual Studio 2015.
+In the Solution Explorer click Project 'INSTALL'. Select Build->Build Solution, if this is successful select 'Build->Build INSTALL'. By default this installs the include files and libraries libraries in 'C:\libjpeg-turbo\include' and 'C:\libjpeg-turbo\lib'
 
-* Install PCL-1.8 and all 3rd party packages that it needs using its
-   All-In-One Installer from 'http://unanancyowen.com/en/pcl18/':
-  'https://1drv.ms/u/s!ApoY_0Ymu57sg5QkeGyAxxAmuI4j0g' (32 bit installer)
+Next start 'cmake-gui', select for 'source code' the directory 'cwi-pcl-codec' (where this file INSTALL.md is located), and for 'binaries' another (empty) directory
 
-* Download source tarball for 'libjpeg-turbo' from 'www.libjpeg-turbo.org':
-  https://sourceforge.net/projects/libjpeg-turbo/files/1.5.3/libjpeg-turbo-1.5.3.tar.gz/download
-  Unpack the tarball and start 'cmake_gui', select for 'source code' directory the top-level directory
-  of 'libturbo-jpeg' (contains 'CMakelists.txt'), and for 'binaries' another directory, click 'Configure' and 'Generate'.
-  Now in your 'binaries' directory open the file 'libjpeg-turbo-1.5.3.sln' with Visual Studio 2015.
-  In the Solution Explorer click Project 'INSTALL'. 
-  Select Build->Build Solution, if this is successful  select 'Build->Build INSTALL'.
-  By default this installs the include files and libraries libraries in 'C:\libjpeg-turbo\include' and
-  'C:\libjpeg-turbo\lib'
+For JPEG_INCLUDES specify 'C:/libjpeg-turbo/include' and for 'JPEG_LIBRARY'
+'C:/libjpeg-turbo/lib/turbojpeg-static.lib'. Next select 'Configure' and 'Generate', and you'll find a Microsoft Visual Studio Solution
+in the directory that was specified for 'binaries'.
 
-* Next start 'cmake-gui', select for 'source code' the directory 'cwi-pcl-codec' (where this file README.md
-  distributed), and for 'binaries' another directory
+Start Visual Studio with the 'Solution' file created in the previous paragraph and select 'Build->Build Solution'.
 
-* Search for 'jpeg', for JPEG_INCLUDES specify 'C:/libjpeg-turbo/include' and for 'JPEG_LIBRARY'
-  'C:/libjpeg-turbo/lib/turbojpeg-static.lib'.
-  Next select 'Configure' and 'Generate', and you'll find a Microsoft Visual Studio Solution
-  in the directory that was specified for 'binaries'.
- 
-* Start Visual Studio with the 'Solution' file created in the previous paragraph and select 'Build->Build Solution'.
+After successful building, the program 'evaluate_compression.exe' can be found in the directory:
+'binaries'\apps\evaluate_compression\Debug.
+Before running, adapt the following environment variable:
+set path=%path%;C:\libjpeg-turbo-gcc\bin;C:\Program Files (x86)\OpenNI2\Tools
 
-* After successful building, the program 'evaluate_compression.exe' can be found in the directory:
- 'binaries'\apps\evaluate_compression\Debug.
-  Before running, adapt the following environment variable:
-  set path=%path%;C:\libjpeg-turbo-gcc\bin;C:\Program Files (x86)\OpenNI2\Tools 
- 
-  Suitable input files for the program can be downloaded from: http://vcl.iti.gr/reconstruction/
-  Most of these data sets are huge; unpack some and specify the full directory path as an argument
-  to the program:
-  evaluate_compression --input_directories=<full path to directory with datafiles>
+Suitable input files for the program can be downloaded from: http://vcl.iti.gr/reconstruction/ Most of these data sets are huge; unpack some and specify the full directory path as an argument to the program: evaluate_compression --input_directories=
 
-Not so easy (tedious, but not difficult) install PCL 1.8.0 from source: (all platforms):
-----------------------------------------------------------------------------------------
+Other platforms: install PCL 1.8.1 from source:
+Get PCL source code from 'https://github.com/PointCloudLibrary/pcl/releases/tag/pcl-1.8.1' (note that the source code in the PCL development tree is not compatible with this package).
 
-* Get PCL source code from 'https://github.com/PointCloudLibrary/pcl/releases/tag/pcl-1.8.0'
-  (note that the source code in the PCL development tree is not compatible with this package).
+Get 3rd party packages: follow the instructions in: http://pointclouds.org/documentation/tutorials/compiling_pcl_dependencies_windows.php or http://pointclouds.org/documentation/tutorials/compiling_pcl_macosx.php#compiling-pcl-macosx Be aware that the version numbers of some 3rd party packages are outdated and should match those used in the 'apt-install' commands above.
 
-* Get 3rd party packages:
-  follow the instructions in: http://pointclouds.org/documentation/tutorials/compiling_pcl_dependencies_windows.php
-  or http://pointclouds.org/documentation/tutorials/compiling_pcl_macosx.php#compiling-pcl-macosx
-  Be aware that the version numbers of some 3rd party packages are outdated and should match those used in the
-  'apt-install' commands above.
+Use 'cmake-gui (>= 3.10)' to configure and generate the files for building each of the additional libraries and excutables in these package; build and install each of the libraries using the build system selected by 'cmake'
 
-* Use 'cmake-gui' to configure and generate the files for building PCL
+Use 'cmake-gui (>= 3.10)' to configure and generate the files for building PCL; build and install the libraries using the build system selected by 'cmake'
 
-* Use 'cmake-gui' to configure and generate the files for building the addional libraries and excutables in this package.
+Download libjpeg-turbo https://sourceforge.net/projects/libjpeg-turbo/files/1.5.3/libjpeg-turbo-1.5.3.tar.gz/download Use: 'configure; make install' to install the libraries
+
+Use 'cmake-gui (>= 3.10)' to configure and generate the files for building cwi-pcl-codec; build and install the libraries using the build system selected by 'cmake'
+
 
 Running the evaluation program
 ==============================
@@ -148,6 +127,31 @@ The following arguments are recognized by the program 'evaluate_compression':
   --debug_level arg (=0)                debug print level (0=no debug print, 3=all debug print)  
 
 The precise meanings of these parameters are explained in the journal paper mentioned above.
+
+Functions exported by the DLL
+=============================
+
+extern "C" __declspec(dllexport) MyPointCloud Cwi_decoder(unsigned char * compFrame)
+Decompress a point ploud passed as a bytestream without name mangling
+
+The point cloud is returned in the following structure:
+struct MyPoint
+{
+	float x;
+	float y;
+	float z;
+	INT8 r;
+	INT8 g;
+	INT8 b;
+};
+struct MyPointCloud
+{
+	MyPoint pointcloud[921600];
+	int size;
+	uint64_t timeStamp;
+};
+
+MyPointCloud includes the capture timestamp from the point cloud header
 
 Apr.6, 2017, updated: Jun 25, 2017 and Apr. 23, 2018.   
 Kees Blom (Kees.Blom@cwi.nl) CWI, Amsterdam, The Netherlands

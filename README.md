@@ -66,27 +66,40 @@ For all other supported systems by downloading, building and installing PCL and 
 
 Now the codec libraries and evaluation tools can be build by typing `make` in the directory that was specified in `cmake-gui` to build the binaries.
 
-###Windows 8,10 Build & Install
+### Windows 8,10 Build & Install
+
+#### Tools
 
 * Install _Visual Studio_ (2015 or 2017)
-* Install _cmake-gui_
+* Install [cmake](https://cmake.org) from <https://cmake.org/download/>.
+* Install [NASM](https://www.nasm.us) from their website, goto _Downloads_, most recent version, _win64_.
+	* Run the installer as Administrator.
+	* It may be that NASM installs in a funny location. Then the _cmake_ below will complain NASM_NOTFOUND in red and you manually have to point it to the NASM executable.
+
+#### libjpeg-turbo
+
 * Download source tarball for [libjpeg-turbo](www.libjpeg-turbo.org) from <https://sourceforge.net/projects/libjpeg-turbo/files/1.5.3/libjpeg-turbo-1.5.3.tar.gz/download>
 * Unpack the tarball and start `cmake_gui`
 * select for _source code_ directory the top-level directoryof _libturbo-jpeg_ (contains `CMakelists.txt`)
 * select for _binaries_ another directory
 * click _Configure_ and _Generate_.
+	* **note** select for Generator _Visual Studio bla bla win64_. That last bit is important.
 * Now in your _binaries_ directory open the file `libjpeg-turbo-1.5.3.sln` with Visual Studio 2015.
 * In the Solution Explorer click Project `INSTALL`. 
 * Select _Build_->_Build Solution_
 * if this is successful select _Build_->_Build INSTALL_. By default this installs the include files and libraries libraries in `C:\libjpeg-turbo\include` and `C:\libjpeg-turbo\lib`
 
-Now build the codec itself.
+#### PCL
+
+See above.
+
+#### cwi-pcl-codec
 
 * start `cmake-gui`
 * select for _source code_ the directory _cwi-pcl-codec_ (where this file `INSTALL.md is` located), and for _binaries_ another (empty) directory.
 * For `JPEG_INCLUDES` specify `C:/libjpeg-turbo/include`
-* * and for `JPEG_LIBRARY`
-select `C:/libjpeg-turbo/lib/turbojpeg-static.lib`. * Next select _Configure_ and _Generate_, and you'll find a Microsoft Visual Studio Solution
+* For `JPEG_LIBRARY` select `C:/libjpeg-turbo/lib/turbojpeg-static.lib`. 
+* Next select _Configure_ and _Generate_, and you'll find a Microsoft Visual Studio Solution
 in the directory that was specified for _binaries_.
 * Start Visual Studio with the Solution file created in the previous paragraph
 *  select _Build_->_Build Solution_.

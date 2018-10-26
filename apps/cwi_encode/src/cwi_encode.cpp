@@ -24,13 +24,14 @@ struct MyPoint
 	INT8 g;
 	INT8 b;
 };
-static MyPoint pointArray[500000];
+
 struct MyPointCloud
 {
 	MyPoint * pointcloud;
 	int size;
-	//uint64_t timeStamp;
+	uint64_t timeStamp;
 };
+//Test function to receive a filename, read a pointcloud .ply and return the contents in a MyPointcloud structure
 extern "C" __declspec(dllexport) MyPointCloud Cwi_test2(char* filename, void *p)
 {
 	std::string path(filename);
@@ -50,7 +51,6 @@ extern "C" __declspec(dllexport) MyPointCloud Cwi_test2(char* filename, void *p)
 	log3 << "\n Load PLY complete size is :" << sizeof(pe->pc);
 	log3.close();
 	MyPointCloud ptcld;
-	//ptcld.pointcloud = pointArray;
 	pcl::PointCloud<PointXYZRGB> cld = *(pe->pc);
 	int size = cld.height * cld.width;
 	ptcld.size = size;
@@ -58,9 +58,9 @@ extern "C" __declspec(dllexport) MyPointCloud Cwi_test2(char* filename, void *p)
 	log4.open("log.txt", std::ofstream::app);
 	log4 << "\n Point count :" << size;
 	log4.close();
+	ptcld.timeStamp = 0;
 	//ptcld.pointcloud = (MyPoint*)::CoTaskMemAlloc(sizeof(MyPoint) * size);
 	ptcld.pointcloud = (MyPoint*)GlobalAlloc(GPTR, sizeof(MyPoint) * size);
-	
 	for (int i = 0; i < size; i++)
 	{
 		(ptcld.pointcloud[i]).x = cld.points[i].x;
@@ -76,14 +76,15 @@ extern "C" __declspec(dllexport) MyPointCloud Cwi_test2(char* filename, void *p)
 	log4.close();
 	return ptcld;
 }
-extern "C" __declspec(dllexport) MyPointCloud Cwi_decoder(unsigned char * compFrame)
+//Decode function to receive a compressed point cloud as a c# Byte[] and return a point cloud as a Mypointcloud object
+extern "C" __declspec(dllexport) MyPointCloud Cwi_decoder(unsigned char * compFrame, int len)
 {
 	encoder_params par;
 	std::ofstream log1;
 	log1.open("log.txt");
 	log1 << "\n Decoder Initialised";
 	log1.close();
-	//Default values in signals
+	//Default codec parameter values set in signals
 	par.num_threads = 1;
 	par.do_inter_frame = false;
 	par.gop_size = 1;
@@ -93,21 +94,35 @@ extern "C" __declspec(dllexport) MyPointCloud Cwi_decoder(unsigned char * compFr
 	par.jpeg_quality = 85;
 	par.macroblock_size = 16;
 	std::ofstream log2;
-	log2.open("log.txt");
+	log2.open("log.txt", std::ofstream::app);
 	log2 << "\n Codec params set";
 	log2.close();
 	std::stringstream compfr;
 	//Convert C# bytestream to stringstream for decoding
-	compfr << (char *) compFrame;
+	for (int i = 0; i < len; i++)
+	{
+		compfr << compFrame[i];
+	}
+	compfr.seekg(0, ios::end);
+	int sizeReceived = compfr.tellg();
+	compfr.seekg(0, ios::beg);
+	std::ofstream logsize;
+	logsize.open("log.txt", std::ofstream::app);
+	logsize << "\n Compressed frame of size " << sizeReceived << " received ";
+	logsize.close();
 	evaluate_comp_impl<PointXYZRGB> evaluate;
 	boost::shared_ptr<pcl::PointCloud<PointXYZRGB> > decpc(new PointCloud<PointXYZRGB>());
 	decpc->makeShared();
 	void * dpc;
 	dpc = reinterpret_cast<void *> (&decpc);
 	uint64_t tmStmp=0;
+	std::ofstream logsize1;
+	logsize1.open("log.txt", std::ofstream::app);
+	logsize1 << "\n Decoder called";
+	logsize1.close();
 	evaluate.evaluate_dc(par, dpc, compfr, tmStmp);
 	std::ofstream log3;
-	log3.open("log.txt");
+	log3.open("log.txt", std::ofstream::app);
 	log3 << "\n Point cloud extracted size is :" << (*decpc).points.size();
 	log3.close();
 	//Format coversion
@@ -116,7 +131,8 @@ extern "C" __declspec(dllexport) MyPointCloud Cwi_decoder(unsigned char * compFr
 	int size = cld.height * cld.width;
 	ptcld.size = size;
 	ptcld.pointcloud = (MyPoint*)GlobalAlloc(GPTR, sizeof(MyPoint) * size);
-	//ptcld.timeStamp = tmStmp;
+	ptcld.timeStamp = tmStmp;
+	//Store points from PCL pointcloud in MyPointcloud
 	for (int i = 0; i < size; i++)
 	{
 		(ptcld.pointcloud[i]).x = cld.points[i].x;
@@ -127,7 +143,7 @@ extern "C" __declspec(dllexport) MyPointCloud Cwi_decoder(unsigned char * compFr
 		(ptcld.pointcloud[i]).b = cld.points[i].b;
 	}
 	std::ofstream log4;
-	log4.open("log.txt");
+	log4.open("log.txt", std::ofstream::app);
 	log4 << "\n Created MyPointCloud object";
 	log4.close();
 	return ptcld;
